@@ -26,7 +26,7 @@ public class LivesManager : MonoBehaviour
     {
         if (player.Lives >= 0)
         {
-            //GameManager.Instance.CheckGameOver(player);
+            GameManager.Instance.PlayerOutOfLives(player);
         }
     }
 

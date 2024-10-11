@@ -8,15 +8,26 @@ public class HumanPlayerController : PlayerController
         InputManager.Instance.SetPlayerController(this);
     }
 
-    public override void Move(Vector2 direction)
+    private void FixedUpdate()
     {
-        Debug.Log($"Move direction: {direction}");
-
-        // Calcula la nueva posición en X sin limitaciones
-        float newX = transform.position.x + direction.x * Speed * Time.deltaTime;
-
-        // Actualiza la posición del jugador
-        transform.position = new Vector3(newX, transform.position.y, transform.position.z);
+        Move();
     }
+
+    public override void Move()
+    {
+        Vector3 moveInput = InputManager.Instance.MoveInput;
+
+        Vector3 direction = new Vector3(moveInput.x, 0, 0);
+
+        Vector3 newPosition = rb.position + direction * Speed * Time.fixedDeltaTime;
+
+        float clampedX = Mathf.Clamp(newPosition.x, -6.3f, 6.3f);
+
+        newPosition = new Vector3(clampedX, newPosition.y, newPosition.z);
+
+        rb.MovePosition(newPosition);
+    }
+
+
 
 }
