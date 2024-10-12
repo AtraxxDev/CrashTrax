@@ -8,9 +8,17 @@ public class AIPlayerController : PlayerController
         Z
     }
 
-    public MovementAxis movementAxis; // Eje de movimiento seleccionado
-    public float moveSpeed = 5f; // Velocidad de movimiento de la IA
-    public float stoppingDistance = 0.5f; // Distancia para detenerse cerca de la pelota
+    public MovementAxis movementAxis;
+    public float detectionRadius = 3f; 
+    public LayerMask ballLayer; 
+
+    private Vector3 initialPosition;
+    private bool isReturning = false;
+
+    private void Start()
+    {
+        initialPosition = transform.position;
+    }
 
     private void FixedUpdate()
     {
@@ -19,59 +27,54 @@ public class AIPlayerController : PlayerController
 
     public override void Move()
     {
-        // Buscar todas las pelotas en la escena
-        Ball[] balls = FindObjectsOfType<Ball>();
+        Vector3 currentPosition = rb.position;
 
-        // Inicializar variables para la pelota más cercana
-        Ball closestBall = null;
-        float closestDistance = Mathf.Infinity;
-
-        // Iterar a través de todas las pelotas para encontrar la más cercana
-        foreach (Ball ball in balls)
+        if (!isReturning)
         {
-            if (ball != null) // Verifica que la pelota no sea nula
+            Collider[] hitColliders = Physics.OverlapSphere(transform.position, detectionRadius, ballLayer);
+
+            if (hitColliders.Length > 0)
             {
-                float distance = Vector3.Distance(transform.position, ball.transform.position);
-
-                // Si la distancia es menor que la más cercana encontrada hasta ahora, actualiza
-                if (distance < closestDistance)
-                {
-                    closestDistance = distance;
-                    closestBall = ball;
-                }
-            }
-        }
-
-        // Si se encontró una pelota cercana
-        if (closestBall != null)
-        {
-            // Calcular la dirección hacia la pelota más cercana
-            Vector3 direction = (closestBall.transform.position - transform.position).normalized;
-
-            // Verificar la distancia para detenerse
-            if (closestDistance > stoppingDistance)
-            {
-                // Calcular la nueva posición según el eje de movimiento
-                Vector3 newPosition;
+                Transform ball = hitColliders[0].transform;
 
                 if (movementAxis == MovementAxis.X)
                 {
-                    newPosition = rb.position + new Vector3(direction.x, 0, 0) * moveSpeed * Time.fixedDeltaTime;
-                    // Clampeo del movimiento en el eje X
-                    float clampedX = Mathf.Clamp(newPosition.x, minX, maxX);
-                    newPosition = new Vector3(clampedX, newPosition.y, newPosition.z);
+                    currentPosition.x = Mathf.MoveTowards(currentPosition.x, ball.position.x, Speed * Time.fixedDeltaTime);
                 }
-                else // Movimiento en el eje Z
+                else 
                 {
-                    newPosition = rb.position + new Vector3(0, 0, direction.z) * moveSpeed * Time.fixedDeltaTime;
-                    // Clampeo del movimiento en el eje Z
-                    float clampedZ = Mathf.Clamp(newPosition.z, minZ, maxZ);
-                    newPosition = new Vector3(newPosition.x, newPosition.y, clampedZ);
+                    currentPosition.z = Mathf.MoveTowards(currentPosition.z, ball.position.z, Speed * Time.fixedDeltaTime);
                 }
-
-                // Mover la IA usando Rigidbody
-                rb.MovePosition(newPosition);
+            }
+            else
+            {
+                isReturning = true;
             }
         }
+        else
+        {
+            if (movementAxis == MovementAxis.X)
+            {
+                currentPosition.x = Mathf.MoveTowards(currentPosition.x, initialPosition.x, Speed * Time.fixedDeltaTime);
+            }
+            else 
+            {
+                currentPosition.z = Mathf.MoveTowards(currentPosition.z, initialPosition.z, Speed * Time.fixedDeltaTime);
+            }
+
+            if (Vector3.Distance(currentPosition, initialPosition) < 0.1f)
+            {
+                currentPosition = initialPosition;
+                isReturning = false; 
+            }
+        }
+
+        rb.MovePosition(currentPosition);
+    }
+
+    private void OnDrawGizmosSelected()
+    {
+        Gizmos.color = Color.yellow;
+        Gizmos.DrawWireSphere(transform.position, detectionRadius);
     }
 }

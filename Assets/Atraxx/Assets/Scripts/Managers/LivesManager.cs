@@ -22,12 +22,4 @@ public class LivesManager : MonoBehaviour
         player.Lives = startingLives;
     }
 
-    public void ReduceLife(PlayerController player)
-    {
-        if (player.Lives >= 0)
-        {
-            GameManager.Instance.PlayerOutOfLives(player);
-        }
-    }
-
 }

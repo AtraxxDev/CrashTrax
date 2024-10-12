@@ -4,12 +4,12 @@ using UnityEngine;
 
 public class BallSpawner : MonoBehaviour
 {
-    public ObjectPooling objectPool; // Referencia al Object Pool
-    public float spawnRadius = 5f; // Radio de generación
-    public float spawnInterval = 2f; // Intervalo de generación
-    public float initialForce = 5f; // Fuerza inicial aplicada a las pelotas
+    public ObjectPooling objectPool; 
+    public float spawnRadius = 5f;
+    public float spawnInterval = 2f; 
+    public float initialForce = 5f;
 
-    private float timer = 0; // Temporizador
+    private float timer = 0; 
 
     private void Start()
     {
@@ -23,7 +23,7 @@ public class BallSpawner : MonoBehaviour
         if (timer >= spawnInterval)
         {
             SpawnBall();
-            timer = 0; // Reiniciar el temporizador
+            timer = 0; 
         }
     }
 
@@ -33,26 +33,22 @@ public class BallSpawner : MonoBehaviour
 
         if (ball != null)
         {
-            // Generar una posición de spawn aleatoria dentro del radio
             Vector3 spawnPosition = transform.position + Random.insideUnitSphere * spawnRadius;
-            spawnPosition.y = transform.position.y; // Asegurarse de que la altura sea la misma
+            spawnPosition.y = transform.position.y; 
 
-            ball.transform.position = spawnPosition; // Colocar la pelota en la posición aleatoria
-            ball.SetActive(true); // Activar la pelota
+            ball.transform.position = spawnPosition;
+            ball.SetActive(true);
 
-            // Generar una dirección aleatoria pero evitando el eje Y positivo
             Vector3 randomDirection = new Vector3(Random.Range(-1f, 1f), 0, Random.Range(-1f, 1f)).normalized;
 
-            ball.GetComponent<Rigidbody>().AddForce(randomDirection * initialForce, ForceMode.Impulse); // Aplicar fuerza
+            ball.GetComponent<Rigidbody>().AddForce(randomDirection * initialForce, ForceMode.Impulse); 
         }
     }
 
     private void OnDrawGizmos()
     {
-        // Establecer el color del gizmo
         Gizmos.color = Color.green;
 
-        // Dibujar una esfera en el centro del spawner con el radio especificado
         Gizmos.DrawWireSphere(transform.position, spawnRadius);
     }
 }

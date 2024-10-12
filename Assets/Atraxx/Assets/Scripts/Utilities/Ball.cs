@@ -23,13 +23,5 @@ public class Ball : MonoBehaviour
         GetComponent<Rigidbody>().AddForce(bounceDirection * bounceForce, ForceMode.Impulse);
     }
 
-    private void OnTriggerEnter(Collider other)
-    {
-        // Verifica si el objeto con el que colisionó está en el layer interactable
-        if (((1 << other.gameObject.layer) & interactable) != 0)
-        {
-            // Desactiva la pelota al colisionar con el layer especificado
-            gameObject.SetActive(false);
-        }
-    }
 }
+
