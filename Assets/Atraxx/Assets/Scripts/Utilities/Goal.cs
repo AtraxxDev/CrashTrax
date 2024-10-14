@@ -7,11 +7,20 @@ public class Goal : MonoBehaviour
     public LayerMask ballLayer;
     private bool goalScored = false;
 
+    public GameObject indicator;
+
+    private void Start()
+    {
+        if (indicator != null)
+        {
+            indicator.SetActive(false);
+        }
+    }
+
     private void OnTriggerEnter(Collider other)
     {
         if (goalScored) return;  
 
-        Debug.Log($"Colisión con: {other.gameObject.name}");
 
         if (((1 << other.gameObject.layer) & ballLayer) != 0)
         {
@@ -20,11 +29,24 @@ public class Goal : MonoBehaviour
 
             player.ReduceLife();
 
+            if (player.Lives <= 0)
+            {
+                ActivateIndicator();
+            }
+
 
             other.gameObject.SetActive(false);
 
 
             goalScored = false;
+        }
+    }
+
+    private void ActivateIndicator()
+    {
+        if (indicator != null)
+        {
+            indicator.SetActive(true);
         }
     }
 

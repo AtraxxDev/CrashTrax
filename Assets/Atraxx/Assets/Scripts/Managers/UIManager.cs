@@ -6,9 +6,12 @@ using TMPro;
 public class UIManager : MonoBehaviour
 {
     public static UIManager Instance { get; private set; }
-
-    // Referencia a los textos de vidas de cada jugador
-    public List<TMP_Text> playerLivesTexts;  // Asigna estos en el Inspector
+    public List<TMP_Text> playerLivesTexts;
+    public GameObject startPanel;
+    public GameObject gameOverPanel;
+    public Button startButton;
+    public Button restartButton;
+    public TMP_Text winnerText;
 
     private void Awake()
     {
@@ -23,25 +26,62 @@ public class UIManager : MonoBehaviour
         }
     }
 
-    // Método para actualizar la UI del jugador correspondiente
+    private void Start()
+    {
+        startButton.onClick.AddListener(StartGame);
+        restartButton.onClick.AddListener(RestartGame);
+        ShowStartPanel();
+        HideGameOverPanel();
+    }
+
     public void UpdateLivesUI(PlayerController player)
     {
-        int playerIndex = GameManager.Instance.players.IndexOf(player);  // Buscar el índice del jugador
+        int playerIndex = GameManager.Instance.players.IndexOf(player);
         if (playerIndex >= 0 && playerIndex < playerLivesTexts.Count)
         {
             playerLivesTexts[playerIndex].text = $"Lives: {player.Lives}";
         }
     }
 
-    // Suscribimos al UI Manager para escuchar eventos de cambios de vidas
     public void SubscribeToPlayer(PlayerController player)
     {
         player.OnLivesChanged += UpdateLivesUI;
     }
 
-    // Desuscribimos al UI Manager cuando ya no es necesario
     public void UnsubscribeFromPlayer(PlayerController player)
     {
         player.OnLivesChanged -= UpdateLivesUI;
+    }
+
+    public void ShowStartPanel() => startPanel.SetActive(true);
+    public void HideStartPanel() => startPanel.SetActive(false);
+    public void ShowGameOverPanel() => gameOverPanel.SetActive(true);
+    public void HideGameOverPanel() => gameOverPanel.SetActive(false);
+
+    public void DisplayWinner(PlayerController winner)
+    {
+        winnerText.text = $"{winner.name} ¡Ha ganado!";
+    }
+
+    private void StartGame()
+    {
+        HideStartPanel();
+        GameManager.Instance.StartGame();
+        UpdateAllLivesUI();
+    }
+
+    private void RestartGame()
+    {
+        HideGameOverPanel();
+        GameManager.Instance.StartGame();
+        UpdateAllLivesUI();
+    }
+
+    private void UpdateAllLivesUI()
+    {
+        foreach (var player in GameManager.Instance.players)
+        {
+            UpdateLivesUI(player);
+        }
     }
 }

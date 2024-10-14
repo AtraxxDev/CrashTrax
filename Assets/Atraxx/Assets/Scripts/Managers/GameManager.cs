@@ -4,8 +4,10 @@ using UnityEngine;
 public class GameManager : MonoBehaviour
 {
     public static GameManager Instance { get; private set; }
-
     public List<PlayerController> players;
+    public ObjectPooling objectPooling;
+    public BallSpawner ballSpawner;
+    public List<GameObject> goals;
 
     private void Awake()
     {
@@ -20,47 +22,66 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    private void Start()
-    {
-        StartGame();
-    }
-
     public void StartGame()
     {
-        // Encuentra todos los jugadores en la escena
-        players = new List<PlayerController>(FindObjectsOfType<PlayerController>());
+        objectPooling.ResetPool();
+        Time.timeScale = 1f;
 
-        // Inicializa a cada jugador y los suscribe al UI Manager
         foreach (var player in players)
         {
             LivesManager.Instance.InitializeLives(player, 15);
             UIManager.Instance.SubscribeToPlayer(player);
+            player.gameObject.SetActive(true);
         }
 
-        Debug.Log("Game started with " + players.Count + " players.");
+        objectPooling.InitializePool();
+        ballSpawner.StartSpawning();
+        DeactivateGoals();
     }
 
-    public void EndGame()
+    public void EndGame(PlayerController winner)
     {
-        Debug.Log("El juego ha terminado.");
+        Time.timeScale = 0f;
+        UIManager.Instance.DisplayWinner(winner);
+        UIManager.Instance.ShowGameOverPanel();
+        ballSpawner.StopSpawning();
+
     }
 
     public void PlayerOutOfLives(PlayerController player)
     {
-        player.gameObject.SetActive(false);  
-        UIManager.Instance.UnsubscribeFromPlayer(player);  
+        player.gameObject.SetActive(false);
+        UIManager.Instance.UnsubscribeFromPlayer(player);
         CheckGameOver();
     }
 
     private void CheckGameOver()
     {
+        PlayerController winner = null;
         int activePlayers = 0;
 
         foreach (var player in players)
         {
-            if (player.Lives > 0) activePlayers++;
+            if (player.Lives > 0)
+            {
+                activePlayers++;
+                winner = player;
+            }
         }
 
-        if (activePlayers <= 1) EndGame();
+        if (activePlayers <= 1)
+        {
+            EndGame(winner);
+        }
     }
+
+    private void DeactivateGoals()
+    {
+        foreach (var goal in goals)
+        {
+            goal.GetComponent<Goal>().indicator.SetActive(false);
+        }
+    }
+
+
 }
