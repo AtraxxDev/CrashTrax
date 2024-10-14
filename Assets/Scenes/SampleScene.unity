@@ -2712,7 +2712,7 @@ MonoBehaviour:
   objectPool: {fileID: 1429403193}
   spawnRadius: 1.6
   spawnInterval: 2
-  initialForce: 8
+  initialForce: 10
 --- !u!1 &386543346
 GameObject:
   m_ObjectHideFlags: 0
